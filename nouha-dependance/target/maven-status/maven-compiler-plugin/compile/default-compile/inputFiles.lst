@@ -1,3 +1,5 @@
-/home/nouha/Bureau/Workspace/EXAMJAVA/java-projet-s1/nouha-dependance/src/main/java/org/nouha/repositories/Database.java
-/home/nouha/Bureau/Workspace/EXAMJAVA/java-projet-s1/nouha-dependance/src/main/java/org/nouha/Main.java
-/home/nouha/Bureau/Workspace/EXAMJAVA/java-projet-s1/nouha-dependance/src/main/java/org/nouha/repositories/impl/MysqlImplement.java
+/home/nouha/Bureau/Workspace/EXAMJAVA/ExamJava/nouha-dependance/src/main/java/org/nouha/repositories/Database.java
+/home/nouha/Bureau/Workspace/EXAMJAVA/ExamJava/nouha-dependance/src/main/java/org/nouha/Main.java
+/home/nouha/Bureau/Workspace/EXAMJAVA/ExamJava/nouha-dependance/src/main/java/org/nouha/utils/ReadFileUtils.java
+/home/nouha/Bureau/Workspace/EXAMJAVA/ExamJava/nouha-dependance/src/main/java/org/nouha/utils/DatabaseUtils.java
+/home/nouha/Bureau/Workspace/EXAMJAVA/ExamJava/nouha-dependance/src/main/java/org/nouha/repositories/impl/MysqlImplement.java

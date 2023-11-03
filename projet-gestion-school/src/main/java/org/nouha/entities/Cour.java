@@ -15,19 +15,16 @@ import java.util.List;
 public class Cour {
     private int id;
     private LocalDate dateCours;
+    private LocalDate dateDebut;
     private LocalDate dateFin;
 
     private TypeDisponibiliteCour disponibiliteCour;
     private TypeEtatCour etatCour;
 
     //OneToMany
-    List<Module> modules;
+    List<Modules> modules;
     List<Classe> classes;
 
     Professeur professeur;
 
-    /* LocalDate date = LocalDate.now();
-     // Création d'une LocalDate spécifique
-    LocalDate specificDate = LocalDate.of(2023, 10, 29);
-    */
 }

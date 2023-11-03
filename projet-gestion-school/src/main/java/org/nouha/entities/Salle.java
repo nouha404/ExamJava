@@ -17,4 +17,15 @@ public class Salle {
 
     //OneToMany
     List<Classe> classes;
+
+    public Salle(int id) {
+        this.id = id;
+    }
+
+    public Salle(String libelleSalle, double capacite, int numeroSalle, List<Classe> classes) {
+        this.libelleSalle = libelleSalle;
+        this.capacite = capacite;
+        this.numeroSalle = numeroSalle;
+        this.classes = classes;
+    }
 }

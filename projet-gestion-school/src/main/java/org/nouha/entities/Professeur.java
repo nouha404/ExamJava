@@ -15,6 +15,10 @@ public class Professeur {
     private String nomComplet;
     private TypeMatiereEnseigner matiereEnseigner;
 
-    List<Module> modules;
     List<Cour> cours;
+
+    public Professeur(int id, String nomComplet) {
+        this.id = id;
+        this.nomComplet = nomComplet;
+    }
 }

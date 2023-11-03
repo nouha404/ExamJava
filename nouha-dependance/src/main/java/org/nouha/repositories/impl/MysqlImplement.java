@@ -1,11 +1,11 @@
 package org.nouha.repositories.impl;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.nouha.repositories.Database;
+import org.nouha.utils.DatabaseUtils;
 
 public class MysqlImplement implements Database {
     private  Connection conn=null;
@@ -18,14 +18,7 @@ public class MysqlImplement implements Database {
 
     @Override
     public void openConnexion(String driver, String url, String username, String password) {
-        try {
-            Class.forName(driver);
-            conn = DriverManager.getConnection(url,username, password);
-        } catch (ClassNotFoundException e) {
-            System.out.println("Erreur de chargement du Driver");
-        } catch (SQLException e) {
-            System.out.println("Erreur d'ouverture de la connexion");
-        }
+        this.conn = DatabaseUtils.openDatabaseConnection(driver, url, username, password);
 
     }
 

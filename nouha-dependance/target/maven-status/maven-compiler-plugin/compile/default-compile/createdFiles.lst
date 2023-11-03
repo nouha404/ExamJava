@@ -1,3 +1,5 @@
 org/nouha/repositories/impl/MysqlImplement.class
+org/nouha/utils/ReadFileUtils.class
 org/nouha/Main.class
+org/nouha/utils/DatabaseUtils.class
 org/nouha/repositories/Database.class
