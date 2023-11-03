@@ -46,6 +46,10 @@ public class SalleServiceImpl implements SalleService{
     public boolean modifierSalle(Salle salle) {
         return salleRepository.modifierSalle(salle);
     }
+    @Override
+    public boolean archiverSalle(int id) {
+        return salleRepository.archiverSalle(id);
+    }
 
 
    

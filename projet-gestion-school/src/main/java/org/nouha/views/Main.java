@@ -54,6 +54,8 @@ public class Main {
                 System.out.println("55-Ajouter salle");
                 System.out.println("56-Lister une salle");
                 System.out.println("57-Modifier une salle");
+                System.out.println("58-Archiver une salle");
+                System.out.println("59-Lister tous les salles");
                 System.out.println("Lister une salle :");
                 System.out.println("4-Lister classe");
                 System.out.println("60-Lister les cours d'un professeur");
@@ -184,6 +186,12 @@ public class Main {
                             salleService.modifierSalle(salleModifier);
                             
                             break;
+                        case 58:
+                            System.out.println("Entrer l'ID de la salle à archiver :");
+                            int idSalleArchiver = sc.nextInt();
+
+                            salleService.archiverSalle(idSalleArchiver);
+                            break;
                         
                             case 60:
                                 System.out.println("Entrer l'id du profeseur :");
@@ -195,6 +203,11 @@ public class Main {
                                 Professeur prof = new Professeur(idCourProf,nomCompletProf);
                                 courService.ListerCourParProfesseur(prof).forEach(System.out::println);
                             break;
+
+                            case 59:
+                                System.out.println("Lister des salles :");
+                                salleService.listerSalles().forEach(System.out::println);
+                                break;
                         
                             case 61:
                         // Lister les cours d'une classe

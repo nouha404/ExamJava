@@ -10,4 +10,5 @@ public interface SalleService extends Service<Salle>{
     List<Salle> listerUneSalle(Salle salle);
     boolean ajouterSalle(Salle salle);
     boolean modifierSalle(Salle salle);
+    boolean archiverSalle(int id);
 }
