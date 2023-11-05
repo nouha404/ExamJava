@@ -2,7 +2,6 @@ package org.nouha.services;
 
 import java.util.List;
 
-
 import org.nouha.entities.Salle;
 
 public interface SalleService extends Service<Salle>{

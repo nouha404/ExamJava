@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.nouha.entities.Cour;
 import org.nouha.entities.Modules;
+import org.nouha.entities.Professeur;
 import org.nouha.entities.Salle;
 import org.nouha.repositories.SalleRepository;
 import org.nouha.services.SalleService;
@@ -50,6 +51,8 @@ public class SalleServiceImpl implements SalleService{
     public boolean archiverSalle(int id) {
         return salleRepository.archiverSalle(id);
     }
+
+   
 
 
    

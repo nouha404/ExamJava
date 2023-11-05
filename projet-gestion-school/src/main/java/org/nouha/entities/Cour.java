@@ -20,11 +20,16 @@ public class Cour {
 
     private TypeDisponibiliteCour disponibiliteCour;
     private TypeEtatCour etatCour;
+    private boolean archive;
 
     //OneToMany
     List<Modules> modules;
     List<Classe> classes;
 
     Professeur professeur;
+
+    public Cour(int id) {
+        this.id = id;
+    }
 
 }

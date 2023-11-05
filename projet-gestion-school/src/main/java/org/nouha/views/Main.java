@@ -50,14 +50,25 @@ public class Main {
                 System.out.println("1-Ajouter une Module");
                 System.out.println("2-Lister les Modules");
                 System.out.println("22-Lister les Modules d'une classe");
-                System.out.println("3-Ajouter classe classe");
+                System.out.println("");
+
+                System.out.println("3-Ajouter une classe");
+                System.out.println("4-Lister les classes");
+                System.out.println("5-Lister une classe");
+                System.out.println("6-Modifier une classe");
+                System.out.println("7-Archiver une classe");
+                System.out.println("8-Afficher les classes qui font un module");
+                System.out.println("9- Afficher les classes d'un professeur ainsi que ses modules enseignés ");
+                System.out.println("");
+
                 System.out.println("55-Ajouter salle");
                 System.out.println("56-Lister une salle");
                 System.out.println("57-Modifier une salle");
                 System.out.println("58-Archiver une salle");
                 System.out.println("59-Lister tous les salles");
                 System.out.println("Lister une salle :");
-                System.out.println("4-Lister classe");
+                System.out.println("");
+
                 System.out.println("60-Lister les cours d'un professeur");
                  System.out.println("61-Lister les cours d'une classe");
                 System.out.println("5-Quitter");
@@ -118,6 +129,17 @@ public class Main {
                         System.out.println("Entrer l'ID du cours :");
                         int idCour = sc.nextInt();
                         sc.nextLine();
+
+                        Salle getSal = salleRepository.findById(idSalle);
+                        Cour getCou = courRepository.findById(idCour);
+
+                        Classe nouvelleClasse = new Classe();
+                        nouvelleClasse.setLibelleClasse(libelleClasse);
+                        nouvelleClasse.setArchive(false);
+                        nouvelleClasse.setSalle(getSal);
+                        nouvelleClasse.setCour(getCou);
+
+                        classeService.ajouterClasse(nouvelleClasse);                       
                         
                         break;
 
@@ -125,6 +147,80 @@ public class Main {
                             System.out.println("Liste des Classes :");
                             System.out.println(classeService.listerClasse());
                            
+                            break;
+                        case 5:
+                            System.out.println("Entrer id de la classse a lister :");
+                            int idClassePrinter = sc.nextInt();
+
+                            Classe classe = new Classe(idClassePrinter);
+                            classeService.listerUneClasse(classe).forEach(System.out::println);
+                            break;
+                        case 6:
+                            System.out.println("Entrer l'ID de la classe à modifier :");
+                            int idClasseModifier = sc.nextInt();
+                            sc.nextLine();
+                        
+                            System.out.println("Entrer le nouveau libellé de classe :");
+                            String newLibelleClasse = sc.nextLine();
+                            boolean isArchived = false;
+
+                            System.out.println("Entrer le nouveau id de la Salle :");
+                            int idNewSalle = sc.nextInt();
+
+                            System.out.println("Entrer le nouveau id de la Cour :");
+                            int idNewCour = sc.nextInt();
+                          
+                            
+                            Classe nouvelClasseModifier = new Classe(idClasseModifier);
+                            nouvelClasseModifier.setLibelleClasse(newLibelleClasse);
+
+                            Salle nouvelleSalle = new Salle(idNewSalle);
+                            Cour nouveauCour = new Cour(idNewCour);
+
+                            nouvelClasseModifier.setSalle(nouvelleSalle);
+                            nouvelClasseModifier.setCour(nouveauCour);
+                            nouvelClasseModifier.setArchive(isArchived);
+
+                            classeService.modifierClasse(nouvelClasseModifier);
+
+                            break;
+                        case 7:
+                            System.out.println("Entrer l'ID de la salle à archiver :");
+                            int idClasseArchiver = sc.nextInt();
+
+                            classeService.archiverClasse(idClasseArchiver);
+                            break;
+                        case 8:
+                            System.out.println("Entrer id de la classe pour afficher ses modules");
+                            int idClass = sc.nextInt();
+                            //je liste dabord les modules pour qu'ils voient
+                            //modulesService.listerModules().forEach(System.out::println);
+                            Classe getLbClas = classeRepository.findById(idClass);
+                            System.out.println("Pour la Classe:" +getLbClas.getLibelleClasse());
+                            classeService.listerClasseDunModule(idClass).forEach(System.out::println);
+                           
+                            break;
+                        case 9:
+                        System.out.println("Entrer l'id de la classe");
+                        int clsId = sc.nextInt();
+                        List<Cour> courFoundByCls = courRepository.findCoursByClasse(clsId);
+                        //j'ai les cours mtn je peux  prendre prof_id pour remonter jusua prof
+                        courFoundByCls.forEach(System.out::println);
+
+                        /*System.out.println("Entrer id du cour que cour pour Afficher les classes d'un professeur ainsi que ses modules enseignés ");
+                        int courID = sc.nextInt();
+                        Professeur professeur = classeRepository.findProfByCourID(courID);
+                        
+                        if (professeur != null) {
+                            System.out.println("Professeur trouvé : ");
+                            System.out.println("ID : " + professeur.getId());
+                            System.out.println("Nom complet : " + professeur.getNomComplet());
+                            System.out.println("Matière enseignée : " + professeur.getMatiereEnseigner());
+                            System.out.println("Archive : " + professeur.isArchive());
+                            System.out.println("Cours : " + professeur.getCours());
+                        } else {
+                            System.out.println("Aucun professeur trouvé pour l'ID de cours spécifié : " + courID);
+                        }*/
                             break;
 
                         case 55:
@@ -164,7 +260,7 @@ public class Main {
 
 
                             break;
-                            case 57:
+                        case 57:
                             System.out.println("Entrer l'ID de la salle à modifier :");
                             int idSalleModifier = sc.nextInt();
                             sc.nextLine();
@@ -226,7 +322,7 @@ public class Main {
                         break;
 
 
-                        case 8:
+                        /*case 8:
                             // Test de la méthode findById
                             int idToFind = 1; // Modifier en fonction de l'ID que vous souhaitez rechercher
                             Salle foundSalle = salleRepository.findById(idToFind);
@@ -236,10 +332,10 @@ public class Main {
                             } else {
                                 System.out.println("Aucune salle trouvée avec l'ID : " + idToFind);
                             }
-                            break;
+                            break;*/
                        
-                        case 9:
-                            // Test de la méthode findById
+                        //case 9:
+                            /*// Test de la méthode findById
                             int idf = 2; // Modifier en fonction de l'ID que vous souhaitez rechercher
                             List<Classe> foundClasses = classeRepository.findClasseById(idf);
 
@@ -250,10 +346,10 @@ public class Main {
                             } else {
                                 System.out.println("Aucune classe trouvée avec l'ID : " + idf);
                             }
-                            break;
+                            break;*/
                     }
                 
-            } while (choix!=5);
+            } while (choix!=59);
         }
       
     }

@@ -14,8 +14,15 @@ public class Professeur {
     private int id;
     private String nomComplet;
     private TypeMatiereEnseigner matiereEnseigner;
-
+    private boolean archive;
     List<Cour> cours;
+
+    public Professeur(int id, String nomComplet, TypeMatiereEnseigner matiereEnseigner, boolean archive) {
+        this.id = id;
+        this.nomComplet = nomComplet;
+        this.matiereEnseigner = matiereEnseigner;
+        this.archive = archive;
+    }
 
     public Professeur(int id, String nomComplet) {
         this.id = id;

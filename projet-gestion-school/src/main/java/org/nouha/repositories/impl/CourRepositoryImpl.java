@@ -18,7 +18,7 @@ public class CourRepositoryImpl implements CourRepository {
     private final String SQL_SELECT_BY_PROFESSEUR= "SELECT id, dateCours, dateDebut, dateFin, disponibiliteCour, etatCour FROM `Cour` WHERE professeur_id = ?";
     private final String SQL_SELECT_BY_CLASSE = "SELECT id, libelleClasse, salle_id FROM `Classe` WHERE cour_id = ?";
     private final  String SQL_SELECT_BY_ID = "SELECT * FROM Cour WHERE id = ?";
-    private final String SQL_SELECT_COUR_BY_CLASSE = "";
+    private final String SQL_SELECT_COUR_BY_CLASSE = "SELECT * FROM Cour WHERE id = ?";
 
     private Database database;
 

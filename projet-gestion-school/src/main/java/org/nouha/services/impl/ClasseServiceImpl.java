@@ -2,8 +2,11 @@ package org.nouha.services.impl;
 
 import java.util.List;
 
+
 import org.nouha.entities.Classe;
 import org.nouha.entities.Cour;
+import org.nouha.entities.Modules;
+import org.nouha.entities.Professeur;
 import org.nouha.entities.Salle;
 import org.nouha.repositories.ClasseRepository;
 import org.nouha.repositories.SalleRepository;
@@ -44,6 +47,30 @@ public class ClasseServiceImpl implements ClasseService {
     public List<Salle> listerSalle() {
         return salleRepository.findAll();
     }
+
+    @Override
+    public List<Classe> listerUneClasse(Classe classe) {
+        return classeRepository.findOneClasse(classe);
+    }
     
+    @Override
+    public boolean modifierClasse(Classe classe) {
+        return classeRepository.modifierClasse(classe);
+    } 
     
+    @Override
+    public boolean archiverClasse(int id) {
+        return classeRepository.archiverClasse(id);
+    }
+
+
+
+    @Override
+    public List<Modules> listerClasseDunModule(int idClass) {
+        return classeRepository.findModuleByClasseID(idClass);
+    }
+
+
+
+   
 }

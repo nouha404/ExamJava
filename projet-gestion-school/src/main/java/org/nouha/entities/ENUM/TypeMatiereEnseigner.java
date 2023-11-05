@@ -12,5 +12,6 @@ public enum TypeMatiereEnseigner {
     UML,
     MATHEMATIQUE,
     ALGO,
-    SGBD
+    SGBD,
+    JAVA
 }
