@@ -6,93 +6,66 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.nouha.entities.Classe;
-import org.nouha.entities.Cour;
 import org.nouha.entities.Modules;
+import org.nouha.entities.Professeur;
 import org.nouha.repositories.ClasseRepository;
-import org.nouha.repositories.CourRepository;
 import org.nouha.repositories.Database;
 import org.nouha.repositories.ModulesRepository;
+import org.nouha.repositories.ProfesseurRepository;
 import org.nouha.utils.ReadFileUtils;
 
 
 public class ModulesRepositoryImpl implements ModulesRepository {
 
-    private final String SQL_INSERT="INSERT INTO `Modules` (`libelleModule`, `archive`, `cour_id`, `classe_id`) VALUES (?, ?, ?, ?)";
-    private final String  SQL_SELECT_ALL_MODULES="SELECT * FROM Modules WHERE archive = false";
+    private final String SQL_INSERT = "INSERT INTO Modules(libelleModule, professeur_id) VALUES (?, ?)";
+    //  private final String SQL_INSERT = "INSERT INTO Salle(libelleSalle, capacite, numeroSalle, isArchived) VALUES (?, ?, ?, ?)";
+    private final String  SQL_SELECT_ALL_MODULES="SELECT * FROM Modules WHERE isArchived = false";
     private final String  SQL_SELECT_BY="SELECT id, libelleModule, archive FROM `Modules` WHERE id=?";
-    private final String SQL_SELECT_MODULES_BY_CLASSE = "SELECT * FROM Modules WHERE classe_id=? AND archive = false";
+    private final String SQL_SELECT_MODULES_BY_CLASSE = "SELECT * FROM Modules WHERE classe_id = ?";
+    private final String SQL_SELECT_MODULES_BY_PROFESSEUR = "SELECT * FROM Modules WHERE professeur_id = ?";
+    private final String SQL_SELECT_MODULES = "SELECT * FROM Modules WHERE module_id = ?";
+    private final String SQL_SELECT_MOD_BY_PROF = "SELECT * FROM Modules WHERE professeur_id = ?";
+
+
+
     private Database database;
     private ClasseRepository classeRepository;
-    private CourRepository courRepository;
+    private ProfesseurRepository professeurRepository;
 
     //injection de dependance
-    public ModulesRepositoryImpl(Database database, ClasseRepository classeRepository,CourRepository courRepository) {
+        public ModulesRepositoryImpl(Database database,ClasseRepository classeRepository,ProfesseurRepository professeurRepository) {
         this.database = database;
         this.classeRepository = classeRepository;
-        this.courRepository = courRepository;
+        this.professeurRepository = professeurRepository;
     }
+
 
     
     
-
-
-
-
-    @Override
-    public List<Modules> findModuleByClasse(Classe classe) {
-        ArrayList<Modules> datas = new ArrayList<>();
-        try {
-                    //recuperer les infos du fichier
-                    String driver = ReadFileUtils.getDriver();
-                    String url = ReadFileUtils.getUrl();
-                    String username = ReadFileUtils.getUsername();
-                    String password = ReadFileUtils.getPassword();
-
-                    database.openConnexion(driver, url,username,password);
-                    database.initPreparedStatement(SQL_SELECT_MODULES_BY_CLASSE);
-                    database.getPs().setInt(1, classe.getId());
-
-                    ResultSet resultSet=database.executeSelect();
-                    while (resultSet.next()) {
-                        Modules module=new Modules(
-                            resultSet.getInt("id"),
-                            resultSet.getString("libelleModule"),
-                            resultSet.getBoolean("archive"),
-                            resultSet.getInt("classe_id"),
-                            resultSet.getInt("cour_id")
-                            );
-                         datas.add(module);
-                           
-                      }
-                   resultSet.close();
-                   database.closeConnexion();
-                } catch (SQLException e) {
-                    System.out.println("Erreur execution de Requete");
-                }
-                return datas;
-
-    }
 
     @Override
     public List<Modules> findAll() {
         ArrayList<Modules> datas=new ArrayList<>();
-                  try {
-                    //recuperer les infos du fichier
-                    String driver = ReadFileUtils.getDriver();
-                    String url = ReadFileUtils.getUrl();
-                    String username = ReadFileUtils.getUsername();
-                    String password = ReadFileUtils.getPassword();
+            try {
+            //recuperer les infos du fichier
+            String driver = ReadFileUtils.getDriver();
+            String url = ReadFileUtils.getUrl();
+            String username = ReadFileUtils.getUsername();
+            String password = ReadFileUtils.getPassword();
 
                 database.openConnexion(driver, url,username,password);
                         database.initPreparedStatement(SQL_SELECT_ALL_MODULES);
                     ResultSet resultSet=database.executeSelect();
                     while (resultSet.next()) {
+                        boolean archive = resultSet.getBoolean("isArchived");
+                       
                         Modules module=new Modules(
                             resultSet.getInt("id"),
                             resultSet.getString("libelleModule"),
-                            resultSet.getBoolean("archive"),
-                            resultSet.getInt("classe_id"),
-                            resultSet.getInt("cour_id")
+                            archive,
+                            null,
+                            null
+                            
                             );
                          datas.add(module);
                            
@@ -137,10 +110,7 @@ public class ModulesRepositoryImpl implements ModulesRepository {
                     if (resultSet.next()) {
                          module=new Modules(
                             resultSet.getInt("id"),
-                            resultSet.getString("libelleModule"),
-                            resultSet.getBoolean("archive"),
-                            resultSet.getInt("classe_id"),
-                            resultSet.getInt("cour_id")
+                            resultSet.getString("libelleModule")
                             );
                            
                       }
@@ -152,46 +122,90 @@ public class ModulesRepositoryImpl implements ModulesRepository {
             return module;
     }
 
-
-
-
     @Override
-    public List<Modules> listerModules(Modules modules) {
+    public List<Modules> getModuleList(Modules module){
         List<Modules> modulesList = new ArrayList<>();
         try {
-        String driver = ReadFileUtils.getDriver();
-        String url = ReadFileUtils.getUrl();
-        String username = ReadFileUtils.getUsername();
-        String password = ReadFileUtils.getPassword();
+            String driver = ReadFileUtils.getDriver();
+            String url = ReadFileUtils.getUrl();
+            String username = ReadFileUtils.getUsername();
+            String password = ReadFileUtils.getPassword();
 
-        database.openConnexion(driver, url, username, password);
-        database.initPreparedStatement(SQL_SELECT_ALL_MODULES);
-        ResultSet resultSet = database.executeSelect();
-
-        while (resultSet.next()) {
-            int moduleId = resultSet.getInt("id");
-            String libelleModule = resultSet.getString("libelleModule");
-            boolean archive = resultSet.getBoolean("archive");
-
-            int classeId = resultSet.getInt("classe_id");
-            int courId = resultSet.getInt("cour_id");
+            database.openConnexion(driver, url, username, password);
+            database.initPreparedStatement(SQL_SELECT_MODULES);
+            database.getPs().setInt(1, module.getId());
+            ResultSet resultSet = database.executeSelect();
             
-            Classe classe = classeRepository.findById(classeId);
-            Cour cour = courRepository.findById(courId);
-            //classeId, libelleModule, archive, classe, cour
-            Modules module = new Modules(moduleId, libelleModule, archive,classe, cour);
-            modulesList.add(module);
-        }
+            while (resultSet.next()){
+                int moduleId = resultSet.getInt("id");
+                String libelleModule = resultSet.getString("libelleModule");
+                boolean archive = resultSet.getBoolean("isArchived");
+                int classeId = resultSet.getInt("classe_id");
+
+                Classe classes = classeRepository.findById(classeId);
+                List<Classe> arrayCls = classeRepository.getclassList(classes);
+   
+                Modules modules = new Modules(
+                    moduleId,
+                    libelleModule,
+                    archive,
+                    arrayCls,
+                    null
+
+                );
+                modulesList.add(modules);
+            }
             resultSet.close();
             database.closeConnexion();
-        } catch (SQLException e) {
-            System.out.println("Erreur d'exécution de la requête");
+        }catch (SQLException e) {
+            System.out.println("Erreur lors de l'exécution de la requête : " + e.getMessage());
         }
-        
         return modulesList;
     }
+    
+    @Override
+    public List<Modules> listerModulesParProfesseur(Professeur professeur) {
+        List<Modules> modulesList = new ArrayList<>();
+        try {
+            String driver = ReadFileUtils.getDriver();
+            String url = ReadFileUtils.getUrl();
+            String username = ReadFileUtils.getUsername();
+            String password = ReadFileUtils.getPassword();
 
+            database.openConnexion(driver, url, username, password);
+            database.initPreparedStatement(SQL_SELECT_MODULES_BY_PROFESSEUR);
+            database.getPs().setInt(1, professeur.getId());
+            ResultSet resultSet = database.executeSelect();
 
+            while (resultSet.next()) {
+                int moduleId = resultSet.getInt("id");
+                String libelleModule = resultSet.getString("libelleModule");
+                boolean archive = resultSet.getBoolean("isArchived");
+                int classeId = resultSet.getInt("classe_id");
+                Classe classes = classeRepository.findById(classeId);
+                List<Classe> arrayCls = classeRepository.getclassList(classes);
+                
+                int profId = resultSet.getInt("professeur_id");
+                Professeur prof = professeurRepository.findById(profId);
+
+                Modules modules = new Modules(
+                    moduleId,
+                    libelleModule,
+                    archive,
+                    arrayCls,
+                    prof
+
+                );
+                modulesList.add(modules);
+            }
+        resultSet.close();
+        database.closeConnexion();
+    } 
+        catch (SQLException e) {
+        System.out.println("Erreur lors de l'exécution de la requête : " + e.getMessage());
+    }
+        return modulesList;
+    }
 
 
     @Override
@@ -211,13 +225,23 @@ public class ModulesRepositoryImpl implements ModulesRepository {
         while (resultSet.next()) {
             int moduleId = resultSet.getInt("id");
             String libelleModule = resultSet.getString("libelleModule");
-            boolean archive = resultSet.getBoolean("archive");
+            boolean archive = resultSet.getBoolean("isArchived");
+            int classeId = resultSet.getInt("classe_id");
+            Classe classes = classeRepository.findById(classeId);
+            List<Classe> arrayCls = classeRepository.getclassList(classes);
+            
+            int profId = resultSet.getInt("professeur_id");
+            Professeur prof = professeurRepository.findById(profId);
 
-            int courId = resultSet.getInt("cour_id");
-            Cour cour = courRepository.findById(courId);
+            Modules modules = new Modules(
+                moduleId,
+                libelleModule,
+                archive,
+                arrayCls,
+                prof
 
-            Modules module = new Modules(moduleId, libelleModule, archive ,classe, cour);
-            modulesList.add(module);
+            );
+            modulesList.add(modules);
         }
         resultSet.close();
         database.closeConnexion();
@@ -226,16 +250,12 @@ public class ModulesRepositoryImpl implements ModulesRepository {
     }
         return modulesList;
     }
+    
 
-
-
-
-
-
-
+    //marche pas
     @Override
-public int insert(Modules data) {
-    int generatedId = 0;
+    public int insert(Modules data) {
+    int lastInsertId = 0;
     try {
         String driver = ReadFileUtils.getDriver();
         String url = ReadFileUtils.getUrl();
@@ -245,18 +265,64 @@ public int insert(Modules data) {
         database.openConnexion(driver, url, username, password);
         database.initPreparedStatement(SQL_INSERT);
         database.getPs().setString(1, data.getLibelleModule());
-        database.getPs().setBoolean(2, data.isArchive());
-        database.getPs().setInt(3, data.getCours().getId());
-        database.getPs().setInt(4, data.getClasses().getId());
-
-        generatedId = database.executeUpdate();
+        database.getPs().setInt(2, data.getProfesseurs().getId());
+   
+        lastInsertId = database.executeUpdate();
         database.closeConnexion();
     } catch (SQLException e) {
         System.out.println("Erreur lors de l'exécution de la requête d'insertion : " + e.getMessage());
     }
-    return generatedId;
+    return lastInsertId;
+    }
+
+
+
+
+
+    @Override
+public List<Modules> findModuleByProfesseur(Professeur professeur) {
+    List<Modules> modulesList = new ArrayList<>();
+    try {
+        String driver = ReadFileUtils.getDriver();
+        String url = ReadFileUtils.getUrl();
+        String username = ReadFileUtils.getUsername();
+        String password = ReadFileUtils.getPassword();
+
+        database.openConnexion(driver, url, username, password);
+        database.initPreparedStatement(SQL_SELECT_MOD_BY_PROF);
+        database.getPs().setInt(1, professeur.getId());
+
+        ResultSet resultSet = database.executeSelect();
+
+        while (resultSet.next()) {
+
+            int moduleId = resultSet.getInt("id");
+            String libelleModule = resultSet.getString("libelleModule");
+            boolean archive = resultSet.getBoolean("isArchived");
+            int classeId = resultSet.getInt("classe_id");
+
+            Classe classes = classeRepository.findById(classeId);
+            List<Classe> arrayCls = classeRepository.getclassList(classes);
+
+            Modules module = new Modules(
+                moduleId,
+                libelleModule,
+                archive,
+                arrayCls,
+                professeur
+            );
+            modulesList.add(module);
+        }
+
+        resultSet.close();
+        database.closeConnexion();
+    } catch (SQLException e) {
+        System.out.println("Erreur lors de l'exécution de la requête : " + e.getMessage());
+    }
+    return modulesList;
 }
 
-    
 
+    
+    
 }

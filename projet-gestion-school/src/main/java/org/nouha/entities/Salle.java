@@ -4,8 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @AllArgsConstructor
 @Data
 @NoArgsConstructor
@@ -14,22 +12,32 @@ public class Salle {
     private String libelleSalle;
     private double capacite;
     private int numeroSalle;
-    private boolean archive;
+    private boolean isArchived;
 
-    //OneToMany
-    List<Classe> classes;
+    //OneToOne
+    Classe classes;
 
-    public Salle(String libelleSalle, double capacite, int numeroSalle, boolean archive, List<Classe> classes) {
+    public Salle(String libelleSalle, double capacite, int numeroSalle, boolean isArchived, Classe classes) {
         this.libelleSalle = libelleSalle;
         this.capacite = capacite;
         this.numeroSalle = numeroSalle;
-        this.archive = archive;
+        this.isArchived = isArchived;
         this.classes = classes;
     }
 
     public Salle(int id) {
         this.id = id;
     }
+
+    @Override
+    public String toString() {
+        return String.format("| %-3s | %-30s | %-10s | %-15s | %-10s | %-20s |",
+                id, libelleSalle, capacite, numeroSalle, isArchived, classes);
+    }
+
+
+
+    
 
   
 }

@@ -14,19 +14,17 @@ import java.util.List;
 @NoArgsConstructor
 public class Cour {
     private int id;
-    private LocalDate dateCours;
+    private String libelleCour;
+    private LocalDate dateCour;
     private LocalDate dateDebut;
     private LocalDate dateFin;
 
     private TypeDisponibiliteCour disponibiliteCour;
     private TypeEtatCour etatCour;
-    private boolean archive;
 
-    //OneToMany
-    List<Modules> modules;
-    List<Classe> classes;
-
-    Professeur professeur;
+    //ManyToOne
+    Classe classes;
+    Professeur professeurs;
 
     public Cour(int id) {
         this.id = id;

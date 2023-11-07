@@ -1,7 +1,9 @@
 package org.nouha.utils;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 
@@ -10,7 +12,12 @@ public class ReadFileUtils {
 
     static {
         try {
-            properties.load(new FileInputStream("src/main/resources/application.properties"));
+            InputStream input = ReadFileUtils.class.getClassLoader().getResourceAsStream("application.properties");
+            if (input == null) {
+                throw new FileNotFoundException("Le fichier de propriétés 'application.properties' n'a pas été trouvé.");
+            }
+            properties.load(input);
+            //properties.load(new FileInputStream("src/main/resources/application.properties"));
         } catch (IOException e) {
             e.printStackTrace();
         }

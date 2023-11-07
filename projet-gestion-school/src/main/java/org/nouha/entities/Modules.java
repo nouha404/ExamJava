@@ -1,5 +1,7 @@
 package org.nouha.entities;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,14 +13,11 @@ public class Modules {
     private int id;
     private String libelleModule;
     private boolean archive;
-    Classe classes;
-    Cour cours;
 
-
-    public Modules(int id, String libelleModule) {
-        this.id = id;
-        this.libelleModule = libelleModule;
-    }
+    //ManyToMany
+    List<Classe> classes;
+    //ManyToOne
+    Professeur professeurs;
 
 
     public Modules(int id, String libelleModule, boolean archive) {
@@ -27,15 +26,16 @@ public class Modules {
         this.archive = archive;
     }
 
-
-    public Modules(int id, String libelleModule,boolean archive, int classe_id, int cour_id) {
+    public Modules(int id, String libelleModule) {
         this.id = id;
         this.libelleModule = libelleModule;
-        this.archive = archive;
-        this.classes = new Classe();
-        this.classes.setId(classe_id);
-        this.cours = new Cour();
-        this.cours.setId(cour_id);
     }
+
+    @Override
+    public String toString() {
+        return String.format("| %-3s | %-30s | %-10s |",
+                id, libelleModule, archive);
+    }
+  
 
 }

@@ -4,14 +4,17 @@ import org.nouha.repositories.impl.ClasseRepositoryImpl;
 import org.nouha.repositories.impl.CourRepositoryImpl;
 import org.nouha.repositories.impl.ModulesRepositoryImpl;
 import org.nouha.repositories.impl.MysqlImplement;
+import org.nouha.repositories.impl.ProfesseurRepositoryImpl;
 import org.nouha.repositories.impl.SalleRepositoryImpl;
 import org.nouha.services.ClasseService;
 import org.nouha.services.CourService;
 import org.nouha.services.ModulesService;
+import org.nouha.services.ProfesseurService;
 import org.nouha.services.SalleService;
 import org.nouha.services.impl.ClasseServiceImpl;
 import org.nouha.services.impl.CourServiceImpl;
 import org.nouha.services.impl.ModulesServiceImpl;
+import org.nouha.services.impl.ProfesseurServiceImpl;
 import org.nouha.services.impl.SalleServiceImpl;
 
 import java.util.List;
@@ -26,24 +29,30 @@ import org.nouha.repositories.ClasseRepository;
 import org.nouha.repositories.CourRepository;
 import org.nouha.repositories.Database;
 import org.nouha.repositories.ModulesRepository;
+import org.nouha.repositories.ProfesseurRepository;
 import org.nouha.repositories.SalleRepository;
 
 
 public class Main {
     public static void main(String[] args) {
-
         Database db = new MysqlImplement();
-        
-        SalleRepository salleRepository = new SalleRepositoryImpl(db);
-        CourRepository courRepository = new CourRepositoryImpl(db);
-        ClasseRepository classeRepository = new ClasseRepositoryImpl(db, salleRepository, courRepository);
-        ModulesRepository moduleRepository = new ModulesRepositoryImpl(db,classeRepository,courRepository);
+        ClasseRepository classeRepository = new ClasseRepositoryImpl(db);
 
-        ModulesService modulesService = new ModulesServiceImpl(moduleRepository,classeRepository, courRepository);
+        SalleRepository salleRepository = new SalleRepositoryImpl(db,classeRepository);
+
+        ProfesseurRepository professeurRepository = new ProfesseurRepositoryImpl(db);
+        ModulesRepository moduleRepository = new ModulesRepositoryImpl(db, classeRepository,professeurRepository);
+
+        CourRepository courRepository = new CourRepositoryImpl(db,professeurRepository);
+        
+        
+
+        ModulesService modulesService = new ModulesServiceImpl(moduleRepository);
         CourService courService = new CourServiceImpl(courRepository);
         SalleService salleService = new SalleServiceImpl(salleRepository);
         ClasseService classeService = new ClasseServiceImpl(salleService,courService,classeRepository,salleRepository);
-
+        //ProfesseurService professeurService = new ProfesseurServiceImpl(classeRepository, moduleRepository);
+      
         int choix;
         try (Scanner sc = new Scanner(System.in)) {
             do {
@@ -66,7 +75,6 @@ public class Main {
                 System.out.println("57-Modifier une salle");
                 System.out.println("58-Archiver une salle");
                 System.out.println("59-Lister tous les salles");
-                System.out.println("Lister une salle :");
                 System.out.println("");
 
                 System.out.println("60-Lister les cours d'un professeur");
@@ -79,43 +87,41 @@ public class Main {
                     case 1 :
                       sc.nextLine();
                       System.out.println("Entrer le libelle du Module");
-                      String libelleModule = sc.nextLine();
+                      //String libelleModule = sc.nextLine();
                       
-                      System.out.println("Entrer l'ID de la classe :");
-                      int idClasse = sc.nextInt();
+                      System.out.println("Entrer l'ID du professeur :");
+                      //int idProf = sc.nextInt();
+                    /* 
+                      Modules modules = new Modules();
+                      modules.setLibelleModule(libelleModule);
 
-                      System.out.println("Entrer l'ID du cours :");
-                      int idCours = sc.nextInt();
-
-                        
-                      Modules module = new Modules();
-                        module.setLibelleModule(libelleModule);
-
-                        boolean inserted = modulesService.ajouterModule(module,idClasse,idCours);
-                        if (inserted) {
-                            System.out.println("Le module a été ajouté avec succès.");
-                        } else {
-                            System.out.println("Erreur lors de l'ajout du module.");
-                        }
+                      Professeur professeur = professeurRepository.findById(idProf);
+                      //s'il n'existe pas , je creer un nouveau
+                      System.out.println(professeur);
+                    
+                    //modulesService.ajouterModule(modules);
+                    */ 
                     
                     break;
                     case 2:
                         System.out.println("Liste des Modules :");
+                        System.out.println(String.format("| %-3s | %-30s | %-10s | %-10s |",
+                                "Id", "LibelleModule", "isArchived", "professeur_id", "classe_id"));
                         modulesService.listerModules().forEach(System.out::println);
+                        System.out.println("");
                         break;
                     case 22:
                         System.out.println("Entrez l'ID de la classe pour laquelle vous souhaitez lister les modules :");
                         int idClasseModule = sc.nextInt();
-                        List<Modules> moduleDuneClasse = modulesService.listerModulesDuneClasse(idClasseModule);
+                        Classe idClsModule = classeRepository.findById(idClasseModule);
 
-                        if (!moduleDuneClasse.isEmpty()) {
-                            System.out.println("Modules de la classe :");
-                            for (Modules modClasse : moduleDuneClasse) {
-                                System.out.println(modClasse.toString());
-                            }
-                        } else {
-                            System.out.println("Aucun module trouvé pour la classe avec l'ID : " + idClasseModule);
-                        }
+                        System.out.println("Liste des Modules pour la classe  "+ idClsModule.getLibelleClasse());
+                        System.out.println(
+                            String.format("| %-3s | %-30s | %-10s |",
+                            "id","libelle Module", "isArchived")
+                        );
+                        modulesService.listerMParClasse(idClsModule).forEach(System.out::println);
+                        
                         break;
                     
                     case 3:
@@ -125,35 +131,46 @@ public class Main {
 
                         System.out.println("Entrer l'ID de la salle :");
                         int idSalle = sc.nextInt();
-                        
-                        System.out.println("Entrer l'ID du cours :");
-                        int idCour = sc.nextInt();
                         sc.nextLine();
 
-                        Salle getSal = salleRepository.findById(idSalle);
-                        Cour getCou = courRepository.findById(idCour);
+                        /*En ajoutant une classe on ajoute son module
+                         * System.out.println("Entrer l'id du module");
+                            int idMod = sc.nextInt();
+                            Modules mod = moduleRepository.findById(idMod);
+                            List<Modules> arrayL = moduleRepository.getModuleList(mod);
+                            nouvelleClasse.setModules(arrayL);
+                         */
 
+                        Salle getSal = salleRepository.findById(idSalle);
+                        //Cour getCou = courRepository.findById(idCour);
+                        boolean isArchived = false;
                         Classe nouvelleClasse = new Classe();
                         nouvelleClasse.setLibelleClasse(libelleClasse);
-                        nouvelleClasse.setArchive(false);
-                        nouvelleClasse.setSalle(getSal);
-                        nouvelleClasse.setCour(getCou);
-
-                        classeService.ajouterClasse(nouvelleClasse);                       
+                        nouvelleClasse.setArchive(isArchived);
+                        nouvelleClasse.setSalles(getSal);
+                       
+                        classeService.ajouterClasse(nouvelleClasse);
+                        classeService.listerClasse().forEach(System.out::println);
                         
                         break;
 
                         case 4:
                             System.out.println("Liste des Classes :");
-                            System.out.println(classeService.listerClasse());
+
+                            System.out.println(
+                            String.format("| %-3s | %-30s | %-10s |",
+                            "id","libelle Module", "isArchived")
+                            );
+                            classeService.listerClasse().forEach(System.out::println);
+                            System.out.println("");
                            
                             break;
                         case 5:
                             System.out.println("Entrer id de la classse a lister :");
                             int idClassePrinter = sc.nextInt();
-
                             Classe classe = new Classe(idClassePrinter);
                             classeService.listerUneClasse(classe).forEach(System.out::println);
+                            System.out.println("");
                             break;
                         case 6:
                             System.out.println("Entrer l'ID de la classe à modifier :");
@@ -162,82 +179,76 @@ public class Main {
                         
                             System.out.println("Entrer le nouveau libellé de classe :");
                             String newLibelleClasse = sc.nextLine();
-                            boolean isArchived = false;
 
                             System.out.println("Entrer le nouveau id de la Salle :");
                             int idNewSalle = sc.nextInt();
 
-                            System.out.println("Entrer le nouveau id de la Cour :");
-                            int idNewCour = sc.nextInt();
-                          
-                            
-                            Classe nouvelClasseModifier = new Classe(idClasseModifier);
-                            nouvelClasseModifier.setLibelleClasse(newLibelleClasse);
-
-                            Salle nouvelleSalle = new Salle(idNewSalle);
-                            Cour nouveauCour = new Cour(idNewCour);
-
-                            nouvelClasseModifier.setSalle(nouvelleSalle);
-                            nouvelClasseModifier.setCour(nouveauCour);
-                            nouvelClasseModifier.setArchive(isArchived);
-
-                            classeService.modifierClasse(nouvelClasseModifier);
+                            boolean isArchiveded = false;
+                            Classe classes = new Classe(idClasseModifier);
+                            classes.setLibelleClasse(newLibelleClasse);
+                            Salle getSalles = salleRepository.findById(idNewSalle);
+                            classes.setSalles(getSalles);
+                            classes.setArchive(isArchiveded);
+                            classeService.modifierClasse(classes);
 
                             break;
                         case 7:
-                            System.out.println("Entrer l'ID de la salle à archiver :");
+                            System.out.println("Entrer l'ID de la Classe à archiver :");
                             int idClasseArchiver = sc.nextInt();
-
-                            classeService.archiverClasse(idClasseArchiver);
+                            classeService.archiverClasse(idClasseArchiver); 
                             break;
                         case 8:
                             System.out.println("Entrer id de la classe pour afficher ses modules");
                             int idClass = sc.nextInt();
-                            //je liste dabord les modules pour qu'ils voient
-                            //modulesService.listerModules().forEach(System.out::println);
                             Classe getLbClas = classeRepository.findById(idClass);
-                            System.out.println("Pour la Classe:" +getLbClas.getLibelleClasse());
-                            classeService.listerClasseDunModule(idClass).forEach(System.out::println);
-                           
+
+                            System.out.println("Liste des Modules pour la classe  "+ getLbClas.getLibelleClasse());
+                            System.out.println(
+                                String.format("| %-3s | %-30s | %-10s |",
+                                "id","libelle Module", "isArchived")
+                            );
+                            modulesService.listerMParClasse(getLbClas).forEach(System.out::println);
                             break;
                         case 9:
-                        System.out.println("Entrer l'id de la classe");
-                        int clsId = sc.nextInt();
-                        List<Cour> courFoundByCls = courRepository.findCoursByClasse(clsId);
-                        //j'ai les cours mtn je peux  prendre prof_id pour remonter jusua prof
-                        courFoundByCls.forEach(System.out::println);
-
-                        /*System.out.println("Entrer id du cour que cour pour Afficher les classes d'un professeur ainsi que ses modules enseignés ");
-                        int courID = sc.nextInt();
-                        Professeur professeur = classeRepository.findProfByCourID(courID);
+                            System.out.println("Entrer l'id du professeur");
+                            int profId = sc.nextInt();
                         
-                        if (professeur != null) {
-                            System.out.println("Professeur trouvé : ");
-                            System.out.println("ID : " + professeur.getId());
-                            System.out.println("Nom complet : " + professeur.getNomComplet());
-                            System.out.println("Matière enseignée : " + professeur.getMatiereEnseigner());
-                            System.out.println("Archive : " + professeur.isArchive());
-                            System.out.println("Cours : " + professeur.getCours());
-                        } else {
-                            System.out.println("Aucun professeur trouvé pour l'ID de cours spécifié : " + courID);
-                        }*/
+                            Professeur findProf = professeurRepository.findById(profId);
+                            List<Modules> getmoduleByProf = moduleRepository.findModuleByProfesseur(findProf);
+
+                            //creer un service pour implemnter ca 
+                            if(getmoduleByProf != null) {
+                                System.out.println("Modules enseignés par le professeur :");
+                                for (Modules modules : getmoduleByProf) {
+                                    System.out.println(modules.toString());
+                                    System.out.println("Classes associées :");
+                                    for (Classe cla : modules.getClasses()) {
+                                        System.out.println(cla.toString());
+                                    }
+                                }
+                            } else {
+                                System.out.println("Aucun module trouvé pour le professeur avec l'ID : " + profId);
+                            }
                             break;
 
                         case 55:
                             Salle salles = new Salle();
                             System.out.println("Entrer libelleSalle :");
-                            String libelleSalle = sc.next();
                             sc.nextLine();
+                            String libelleSalle = sc.nextLine();
 
                             System.out.println("Entrer la capacite :");
+                            
                             Double capacite = sc.nextDouble();
                             
                             System.out.println("Entrer numeroSalle :");
                             int numeroSalle = sc.nextInt();
-                           
+
+                            boolean salleArchived = false;
                             salles.setLibelleSalle(libelleSalle);
                             salles.setCapacite(capacite);
                             salles.setNumeroSalle(numeroSalle);
+                            salles.setArchived(salleArchived);
 
                             boolean salleAdded = salleService.ajouterSalle(salles);
                             if (salleAdded) {
@@ -245,7 +256,6 @@ public class Main {
                             } else {
                                 System.out.println("Erreur lors de l'ajout de la salle.");
                             }
-
 
                             System.out.println(salleService.listerSalles());
                            
@@ -255,9 +265,8 @@ public class Main {
                             int idSallePrinter = sc.nextInt();
 
                             Salle salle = new Salle(idSallePrinter);
-                            salleService.listerUneSalle(salle).forEach(System.out::println);
+                            salleService.listerUneSalle(salle).forEach(s -> System.out.println(s.toString()));
                             
-
 
                             break;
                         case 57:
@@ -278,15 +287,16 @@ public class Main {
                             salleModifier.setLibelleSalle(newLibelleSalle);
                             salleModifier.setCapacite(nouvelleCapacite);
                             salleModifier.setNumeroSalle(nouveauNumeroSalle);
-
+                            boolean salleArch = false;
+                            salleModifier.setArchived(salleArch);
                             salleService.modifierSalle(salleModifier);
                             
                             break;
                         case 58:
                             System.out.println("Entrer l'ID de la salle à archiver :");
                             int idSalleArchiver = sc.nextInt();
-
                             salleService.archiverSalle(idSalleArchiver);
+                            
                             break;
                         
                             case 60:
@@ -296,13 +306,17 @@ public class Main {
                                 System.out.println("Entrer nomComplet du profeseur :");
                                 String nomCompletProf = sc.nextLine();
                                 
-                                Professeur prof = new Professeur(idCourProf,nomCompletProf);
-                                courService.ListerCourParProfesseur(prof).forEach(System.out::println);
+                                //Professeur prof = new Professeur(idCourProf,nomCompletProf);
+                                //courService.ListerCourParProfesseur(prof).forEach(System.out::println);
                             break;
 
                             case 59:
                                 System.out.println("Lister des salles :");
+                                System.out.println("");
+                                System.out.println(String.format("| %-3s | %-30s | %-10s | %-15s | %-10s | %-20s |",
+                                "Id", "LibelleSalle", "Capacite", "NumeroSalle", "IsArchived", "Classes"));
                                 salleService.listerSalles().forEach(System.out::println);
+                                //
                                 break;
                         
                             case 61:
@@ -310,15 +324,15 @@ public class Main {
                         System.out.println("Entrez l'ID de la classe pour laquelle vous souhaitez afficher les cours :");
                         int idClasseCours = sc.nextInt();
 
-                        List<Cour> courClasse = courRepository.findCoursByClasse(idClasseCours);
-                        if (!courClasse.isEmpty()) {
-                            System.out.println("Cours de la classe :");
-                            for (Cour cour : courClasse) {
-                                System.out.println(cour.toString());
-                            }
-                        } else {
-                            System.out.println("Aucun cours trouvé pour la classe avec l'ID : " + idClasseCours);
-                        }
+                        //List<Cour> courClasse = courRepository.findCoursByClasse(idClasseCours);
+                        //if (!courClasse.isEmpty()) {
+                         //   System.out.println("Cours de la classe :");
+                         //   for (Cour cour : courClasse) {
+                           //     System.out.println(cour.toString());
+                        //    }
+                        //} else {
+                         //   System.out.println("Aucun cours trouvé pour la classe avec l'ID : " + idClasseCours);
+                        ////}
                         break;
 
 

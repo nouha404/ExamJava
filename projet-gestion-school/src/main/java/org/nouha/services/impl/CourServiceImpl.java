@@ -22,11 +22,11 @@ public class CourServiceImpl implements CourService {
         }
         return null;
     }
-    @Override
+    /*@Override
     public List<Cour> ListerCourParProfesseur(Professeur prof) {
         return courRepository.findCoursByProfesseur(prof);
 
-    }
+    }*/
   
     
 }

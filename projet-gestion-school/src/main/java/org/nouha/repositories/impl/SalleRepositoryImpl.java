@@ -6,32 +6,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.nouha.entities.Classe;
-import org.nouha.entities.Cour;
 import org.nouha.entities.Salle;
 import org.nouha.repositories.ClasseRepository;
-import org.nouha.repositories.CourRepository;
 import org.nouha.repositories.Database;
 import org.nouha.repositories.SalleRepository;
 import org.nouha.utils.ReadFileUtils;
 
 public class SalleRepositoryImpl implements SalleRepository {
-    private final String SQL_INSERT = "INSERT INTO Salle(libelleSalle, capacite, numeroSalle, archive) VALUES (?, ?, ?, ?)";
-    private final String SQL_SELECT_BY_ID = "SELECT * FROM Salle WHERE id = ?";
+    private final String SQL_INSERT = "INSERT INTO Salle(libelleSalle, capacite, numeroSalle, isArchived) VALUES (?, ?, ?, ?)";
+    private final String SQL_UPDATE = "UPDATE Salle SET libelleSalle = ?, capacite = ?, numeroSalle = ?, isArchived = ?  WHERE id = ?";
     private final String  SQL_SELECT_ALL="SELECT * FROM Salle";
-    private final String SQL_SELECT_BY_SALLE =  "SELECT * FROM `Salle` WHERE id = ?";
-    private final String SQL_UPDATE = "UPDATE Salle SET libelleSalle = ?, capacite = ?, numeroSalle = ?, archive = ? WHERE id = ?";
-    private final String SQL_ARCHIVE = "UPDATE Salle SET archive = ? WHERE id = ?";
+    private final String SQL_SELECT_BY_ID = "SELECT * FROM Salle WHERE id = ?";
+
+    private final String SQL_ARCHIVE = "UPDATE Salle SET isArchived = ? WHERE id = ?";
 
 
     private Database database;
     ClasseRepository classeRepository;
-    CourRepository courRepository;
     
     //injection de dependance
-    public SalleRepositoryImpl(Database database, ClasseRepository classeRepository, CourRepository courRepository) {
+    public SalleRepositoryImpl(Database database, ClasseRepository classeRepository) {
         this.database = database;
         this.classeRepository = classeRepository;
-        this.courRepository = courRepository;
     }
 
 
@@ -42,7 +38,7 @@ public class SalleRepositoryImpl implements SalleRepository {
 
     @Override
     public List<Salle> findAll() {
-        List<Salle> classesList = new ArrayList<>();
+        List<Salle> SalleList = new ArrayList<>();
         try {
             String driver = ReadFileUtils.getDriver();
             String url = ReadFileUtils.getUrl();
@@ -53,7 +49,7 @@ public class SalleRepositoryImpl implements SalleRepository {
             ResultSet resultSet = database.executeSelect();
 
             while (resultSet.next()) {
-                boolean isArchived = resultSet.getBoolean("archive");
+                boolean isArchived = resultSet.getBoolean("isArchived");
                 if (!isArchived) {
                     Salle salle = new Salle(
                         resultSet.getInt("id"),
@@ -63,7 +59,7 @@ public class SalleRepositoryImpl implements SalleRepository {
                         isArchived,
                         null
                     );
-                    classesList.add(salle);
+                    SalleList.add(salle);
                 }
             }
             resultSet.close();
@@ -71,7 +67,7 @@ public class SalleRepositoryImpl implements SalleRepository {
         } catch (SQLException e) {
             System.out.println("Erreur d'exécution de la requête" + e.getMessage());
         }
-        return classesList;
+        return SalleList;
     }
 
 
@@ -84,28 +80,28 @@ public class SalleRepositoryImpl implements SalleRepository {
     @Override
     public int insert(Salle data) {
     int lastInsertId = 0;
-    try {
-        String driver = ReadFileUtils.getDriver();
-        String url = ReadFileUtils.getUrl();
-        String username = ReadFileUtils.getUsername();
-        String password = ReadFileUtils.getPassword();
-
-        database.openConnexion(driver, url, username, password);
-        database.initPreparedStatement(SQL_INSERT);
-
-        database.getPs().setString(1, data.getLibelleSalle());
-        database.getPs().setDouble(2, data.getCapacite());
-        database.getPs().setInt(3, data.getNumeroSalle());
-        database.getPs().setBoolean(4, data.isArchive());
-
-      
-        lastInsertId = database.executeUpdate();
-        database.closeConnexion();
-    } catch (SQLException e) {
-        System.out.println("Erreur lors de l'exécution de la requête d'insertion : " + e.getMessage());
-    }
+        try {
+            String driver = ReadFileUtils.getDriver();
+            String url = ReadFileUtils.getUrl();
+            String username = ReadFileUtils.getUsername();
+            String password = ReadFileUtils.getPassword();
+            
+            database.openConnexion(driver, url, username, password);
+            database.initPreparedStatement(SQL_INSERT);
+            database.getPs().setString(1, data.getLibelleSalle());
+            database.getPs().setDouble(2, data.getCapacite());
+            database.getPs().setInt(3, data.getNumeroSalle());
+            database.getPs().setBoolean(4, data.isArchived());
+            
+            lastInsertId = database.executeUpdate();
+            database.closeConnexion();
+        } catch (SQLException e) {
+            System.out.println("Erreur lors de l'exécution de la requête d'insertion : " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Une erreur inattendue s'est produite : " + e.getMessage());
+        }
     return lastInsertId;
-}
+    }
 
 
 
@@ -130,17 +126,18 @@ public class SalleRepositoryImpl implements SalleRepository {
             database.getPs().setInt(1, id);
             ResultSet resultSet = database.executeSelect();
 
-            //List<Classe> classes = classeRepository.findClasseById(id);
             if (resultSet.next()) {
+                int classeId = resultSet.getInt("classe_id");
+                Classe classe = classeRepository.findById(classeId);
+
                 salle = new Salle(
                     resultSet.getInt("id"),
                     resultSet.getString("libelleSalle"),
                     resultSet.getDouble("capacite"),
                     resultSet.getInt("numeroSalle"),
-                    resultSet.getBoolean("archive"),
-                    null
+                    resultSet.getBoolean("isArchived"),
+                    classe
                 );
-
                 
             }
             resultSet.close();
@@ -155,29 +152,36 @@ public class SalleRepositoryImpl implements SalleRepository {
     public List<Salle> findOneSalle(Salle salle) {
         List<Salle> salleList = new ArrayList<>();
         try {
+            
             String driver = ReadFileUtils.getDriver();
             String url = ReadFileUtils.getUrl();
             String username = ReadFileUtils.getUsername();
             String password = ReadFileUtils.getPassword();
 
             database.openConnexion(driver, url, username, password);
-            database.initPreparedStatement(SQL_SELECT_BY_SALLE);
+            database.initPreparedStatement(SQL_SELECT_BY_ID);
             database.getPs().setInt(1, salle.getId());
             ResultSet resultSet = database.executeSelect();
             while (resultSet.next()) {
                 Salle salles = new Salle();
 
+                
                 salles.setId(resultSet.getInt("id"));
                 salles.setLibelleSalle(resultSet.getString("libelleSalle"));
                 salles.setCapacite(resultSet.getDouble("capacite"));
                 salles.setNumeroSalle(resultSet.getInt("numeroSalle"));
+                salles.setArchived(resultSet.getBoolean("isArchived"));
                 
+                //recupere la classe correpondant
+                int classeId = resultSet.getInt("classe_id");
+                Classe classe = classeRepository.findById(classeId);
+                salles.setClasses(classe);
                 salleList.add(salles);
             }
             resultSet.close();
             database.closeConnexion();
         } catch (SQLException e) {
-            System.out.println("Erreur d'exécution de la requête");
+            System.out.println("Erreur d'exécution de la requête "+ e.getMessage());
         }
         return salleList;
     }
@@ -193,10 +197,11 @@ public class SalleRepositoryImpl implements SalleRepository {
 
             database.openConnexion(driver, url, username, password);
             database.initPreparedStatement(SQL_UPDATE);
+
             database.getPs().setString(1, salle.getLibelleSalle());
             database.getPs().setDouble(2, salle.getCapacite());
             database.getPs().setInt(3, salle.getNumeroSalle());
-            database.getPs().setBoolean(4, salle.isArchive());
+            database.getPs().setBoolean(4, salle.isArchived());
             database.getPs().setInt(5, salle.getId());
 
             int rowsAffected = database.executeUpdate();
@@ -234,7 +239,7 @@ public class SalleRepositoryImpl implements SalleRepository {
 
             int rowsAffected = database.executeUpdate();
             database.closeConnexion();
-
+            
             if (rowsAffected > 0) {
                 System.out.println("La salle a été archivée avec succès.");
                 return true;
@@ -243,16 +248,10 @@ public class SalleRepositoryImpl implements SalleRepository {
                 return false;
             }
         } catch (SQLException e) {
-            System.out.println("Erreur SQL lors de l'archivage de la salle : " + e.getMessage());
-            return false;
-        } catch (Exception e) {
-            System.out.println("Une erreur inattendue s'est produite lors de l'archivage de la salle : " + e.getMessage());
+            System.out.println("Erreur execution de la requeteSQL : " + e.getMessage());
             return false;
         }
     }
-
-
-     
 
 
     

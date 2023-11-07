@@ -4,23 +4,37 @@ package org.nouha.services.impl;
 import java.util.List;
 
 import org.nouha.entities.Classe;
-import org.nouha.entities.Cour;
 import org.nouha.entities.Modules;
-import org.nouha.repositories.ClasseRepository;
-import org.nouha.repositories.CourRepository;
+import org.nouha.entities.Professeur;
 import org.nouha.repositories.ModulesRepository;
 import org.nouha.services.ModulesService;
 
 public class ModulesServiceImpl implements ModulesService {
     private ModulesRepository moduleRepository;
-    private ClasseRepository classeRepository;
-    private CourRepository courRepository;
+    
    
-    public ModulesServiceImpl(ModulesRepository moduleRepository, ClasseRepository classeRepository,CourRepository courRepository) {
+    public ModulesServiceImpl(ModulesRepository moduleRepository) {
         this.moduleRepository = moduleRepository;
-        this.classeRepository = classeRepository;
-        this.courRepository = courRepository;
     }
+
+    @Override
+    public boolean ajouterModule(Modules modules) {
+        return moduleRepository.insert(modules)!=0;
+    }
+
+    @Override
+    public List<Modules> listerModules() {
+        return moduleRepository.findAll();
+    }
+
+    @Override
+    public List<Modules> listerMParClasse(Classe cls) {
+        return moduleRepository.listerModulesParClasse(cls);
+        
+    }
+
+   
+    /*
 
     @Override
     public boolean ajouterModule(Modules module,int idClasse, int idCour) {
@@ -59,10 +73,7 @@ public class ModulesServiceImpl implements ModulesService {
         }
     }
 
-    @Override
-    public List<Modules> listerModules() {
-        return moduleRepository.findAll();
-    }
+    
 
     @Override
     public Modules rechercherParId(int id) {
@@ -75,5 +86,7 @@ public class ModulesServiceImpl implements ModulesService {
         return moduleRepository.listerModulesParClasse(classe);
     }
     
+    */
+
     
 }

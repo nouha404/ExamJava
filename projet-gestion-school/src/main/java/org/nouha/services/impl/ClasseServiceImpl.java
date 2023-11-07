@@ -26,12 +26,40 @@ public class ClasseServiceImpl implements ClasseService {
         this.classeRepository = classeRepository;
         this.salleRepository = salleRepository;
     }
-    
-   
-    
+
     @Override
     public List<Classe> listerClasse() {
         return classeRepository.findAll();
+    }
+
+    @Override
+    public List<Classe> listerUneClasse(Classe classe) {
+        System.out.println("");
+        System.out.println(String.format("| %-3s | %-30s | %-10s |",
+                                "Id", "Libelle Classe", "isArchived"));
+        return classeRepository.findOneClasse(classe);
+    } 
+
+    @Override
+    public boolean ajouterClasse(Classe classe) {
+        return classeRepository.insert(classe)!=0;
+    }
+
+    @Override
+    public boolean modifierClasse(Classe classe) {
+        return classeRepository.modifierClasse(classe);
+    }
+
+    @Override
+    public boolean archiverClasse(int id) {
+        return classeRepository.archiverClasse(id);
+    }
+    
+   /*
+    
+    @Override
+    public boolean ajouterClasse(Classe Classe) {
+        return classeRepository.insert(classe)!=0;
     }
 
 
@@ -71,6 +99,6 @@ public class ClasseServiceImpl implements ClasseService {
     }
 
 
-
+*/
    
 }

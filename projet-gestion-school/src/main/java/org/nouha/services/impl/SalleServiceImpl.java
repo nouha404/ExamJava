@@ -2,9 +2,6 @@ package org.nouha.services.impl;
 
 import java.util.List;
 
-import org.nouha.entities.Cour;
-import org.nouha.entities.Modules;
-import org.nouha.entities.Professeur;
 import org.nouha.entities.Salle;
 import org.nouha.repositories.SalleRepository;
 import org.nouha.services.SalleService;
@@ -39,7 +36,9 @@ public class SalleServiceImpl implements SalleService{
     
     @Override
     public List<Salle> listerUneSalle(Salle salle) {
-        //Salle saleFounded = salleRepository.findById(idSalle);
+        System.out.println("");
+        System.out.println(String.format("| %-3s | %-30s | %-10s | %-15s | %-10s | %-20s |",
+                                "Id", "LibelleSalle", "Capacite", "NumeroSalle", "IsArchived", "Classes"));
         return salleRepository.findOneSalle(salle);
     }
 
